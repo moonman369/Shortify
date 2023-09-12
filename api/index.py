@@ -4,6 +4,9 @@ import os
 from werkzeug.utils import secure_filename
 from mongopy import MongoOp
 
+
+
+
 mongo = MongoOp()
 mongo.connect("shortify")
 mongo.get_collection("urlList")
@@ -80,5 +83,5 @@ def session_api():
     return jsonify(list(session.keys()))
 
 
-# if __name__ == "__main__":
-#     app.run(port=8001)
+if __name__ == "__main__":
+    app.run(port=8001)
