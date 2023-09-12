@@ -2,9 +2,18 @@ from flask import render_template, request, redirect, url_for, flash, abort, ses
 import json
 import os
 from werkzeug.utils import secure_filename
+from mongopy import MongoOp
+
+mongo = MongoOp()
+mongo.connect("shortify")
+mongo.get_collection("urlList")
 
 app = Flask(__name__)
 app.secret_key = '  yomommasofatshebendslight'
+
+uri = "mongodb+srv://moonman369:ayan%23123@cluster0.gblpsp7.mongodb.net/?retryWrites=true&w=majority"
+
+
 
 @app.route('/')
 def home():
@@ -20,12 +29,14 @@ def your_url():
                 # print(urls_file)
                 urls = json.load(urls_file)
 
-        if request.form['code'] in urls.keys():
+        # if request.form['code'] in urls.keys():
+        if mongo.find({"short":request.form['code']}):
             flash('Short name is already in use. Please try another one.')
             return redirect(url_for('home'))
         
         if 'url' in request.form.keys():
-           urls[request.form['code']] = {'url': request.form['url']}
+        #    urls[request.form['code']] = {'url': request.form['url']}
+            mongo.insert({"short":request.form['code'], "url":request.form['url']})
         else: 
             f = request.files['file']
             full_name = request.form['code'] + secure_filename(f.filename)
@@ -36,9 +47,9 @@ def your_url():
             f.save(os.path.join(f'{os.getcwd()}/user_files', full_name))
             urls[request.form['code']] = {'file': full_name}
 
-        with open('url_list.json', 'w') as url_file:
-            json.dump(urls, url_file)
-            session[request.form['code']] = True
+        # with open('url_list.json', 'w') as url_file:
+        #     json.dump(urls, url_file)
+        session[request.form['code']] = True
         return render_template('your_url.html', code=request.form['code'])
     else: 
         return redirect(url_for('home'))
@@ -46,16 +57,18 @@ def your_url():
 
 @app.route('/<string:code>')
 def redirect_to_url(code):
-    if os.path.exists('url_list.json'):
-        with open('url_list.json') as urls_file:
-            urls = json.load(urls_file)
-            if code in urls.keys():
-                if 'url' in urls[code].keys():
-                    return redirect(urls[code]['url'])
-                else:
-                    print(os.getcwd())
-                    return redirect(url_for('api/static', filename=f'user_files/' + urls[code]['file']))
-    return abort(404)
+    # if mongo.find(code):
+    #     return redirect()
+    # if os.path.exists('url_list.json'):
+    #     with open('url_list.json') as urls_file:
+    #         urls = json.load(urls_file)
+    #         if code in urls.keys():
+    #             if 'url' in urls[code].keys():
+    #                 return redirect(urls[code]['url'])
+    #             else:
+    #                 print(os.getcwd())
+    #                 return redirect(url_for('api/static', filename=f'user_files/' + urls[code]['file']))
+    return redirect(mongo.find({"short":code})) if mongo.find({"short":code}) else abort(404)
 
 @app.errorhandler(404)
 def page_not_found(error):
@@ -68,4 +81,4 @@ def session_api():
 
 
 if __name__ == "__main__":
-    app.run(port=8001)
+    app.run(port=8001, debug=True)

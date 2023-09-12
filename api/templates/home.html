@@ -2,7 +2,7 @@
 main %}
 
 <div class="container">
-  <div class="card-deck mb-3">
+  <div class="card-deck mb-7">
     <div class="card mb-4 shadow-sm">
       <div class="card-header">
         <h4 class="my-0 font-weight-normal text-center">Website</h4>
@@ -35,7 +35,7 @@ main %}
         </form>
       </div>
     </div>
-    <div class="card mb-4 shadow-sm">
+    <!-- <div class="card mb-4 shadow-sm">
       <div class="card-header">
         <h4 class="my-0 font-weight-normal text-center">File</h4>
       </div>
@@ -65,19 +65,22 @@ main %}
           </button>
         </form>
       </div>
-    </div>
+    </div> -->
+  </div>
+    <br />
+    {% if codes %}
+    <h2>Codes you have created:</h2>
+    <br />
+    <br />
+    <ul>
+      {% for code in codes %}
+      <a href="{{ url_for('redirect_to_url', code=code) }}">
+        <li>{{ code }}</li>
+      </a>
+      {% endfor %}
+    </ul>
+    {% endif %}
   </div>
 
-  {% if codes %}
-  <h2>Codes you have created:</h2>
-  <ul>
-    {% for code in codes %}
-    <a href="{{ url_for('redirect_to_url', code=code) }}">
-      <li>{{ code }}</li>
-    </a>
-    {% endfor %}
-  </ul>
-  {% endif %}
+  {% endblock %}
 </div>
-
-{% endblock %}
